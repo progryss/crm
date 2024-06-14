@@ -99,9 +99,6 @@ font-size:14px;
 .customer-table-css tbody tr td:first-child{
 padding-left:17px;
 }
-.customer-table-css thead tr th:first-child .react-resizable{
-width:50px;
-}
 .customer-table-css thead tr th{
 background-color: #f8f9fa;
 border: 1px solid #ddd;
@@ -232,4 +229,11 @@ right: 12px;
 .no-of-item{
 font-weight: 500;
 color: #858383;
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px; /* Adjust max-width as per your design */
 }
