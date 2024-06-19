@@ -64,7 +64,7 @@ font-size:15px;
 .add-customer-btn,.search-input,.search-icon-custom,#dropdownMenuButton{
 padding: 0px 11px;
 min-height: 32px;
-font-size: 15px;
+font-size: 14px;
 border-radius: 5px;
 background: #fff;
 }
@@ -119,6 +119,10 @@ border-bottom:0!important;
 }
 .dropdown-menu li .dropdown-item{
 border-bottom:1px solid #ddd!important;
+font-size:14px;
+text-transform:capitalize;
+display: flex;
+gap: 8px;
 }
 .dropdown-menu{
 padding:0;
@@ -236,4 +240,72 @@ color: #858383;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 150px; /* Adjust max-width as per your design */
+}
+
+.customer-details-grid{
+  display:grid;
+  grid-template-columns:3fr 2fr;
+  gap:15px;
+}
+.two-column-layout,.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:30px;
+}
+.detail-tab-box{
+  border-bottom: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+.detail-tab-box h5{
+  width: max-content;
+    margin-bottom: 0;
+    border-bottom: 3px solid blue;
+    padding-bottom: 10px;
+}
+.label-title{
+  font-size: 14px;
+  color: grey;
+  font-weight: 400;
+  padding-bottom: 5px;
+}
+.label-value{
+  font-size: 16px;
+    color: grey;
+    font-weight: 700;
+}
+.comment-text{
+  font-size:16px;
+  line-height:normal;
+  color:#000000;
+  font-weight:600;
+}
+.comment-timestamp{
+  font-size:14px;
+}
+.comment-box{
+  max-height:300px;
+  overflow:auto;
+}
+.fa-arrow-left{
+ cursor:pointer; 
+}
+.status-card-list ul {
+  list-style-type: none;
+  padding-left: 0;
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  margin-bottom:0;
+}
+
+.status-card-list ul li{
+  border-right:1px solid #ddd;
+  padding:5px 30px;
+  position: relative;
+}
+.status-card-list ul li:last-child{
+  border-right:0;
+}
+input:focus,textarea:focus,select:focus{
+  box-shadow:none!important;
 }
