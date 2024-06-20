@@ -9,8 +9,18 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        setIsLoggedIn(loggedIn);
+        const isAppInitialized = sessionStorage.getItem('isAppInitialized');
+
+        if (!isAppInitialized) {
+            // This block will only run on the first server start (or if session storage is cleared)
+            localStorage.setItem('isLoggedIn', 'false');
+            sessionStorage.setItem('isAppInitialized', 'true');
+            setIsLoggedIn(false);
+        } else {
+            // Regular refresh behavior
+            const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            setIsLoggedIn(loggedIn);
+        }
     }, []);
 
     const handleLogin = () => {
@@ -44,12 +54,10 @@ function AppContent({ isLoggedIn, handleLogin, handleLogout }) {
             {shouldDisplayHeader() && <Header handleLogout={handleLogout} />}
             <main className="main-content-css">
                 <Routes>
-                    <Route path="/" element={
-                        isLoggedIn ? <Customer /> : <Navigate to="/login" />
-                    } />
-                    <Route path="/login" element={
-                        isLoggedIn ? <Navigate to="/" /> : <LoginPage handleLogin={handleLogin} />
-                    } />
+                    <Route path="/" element={<Navigate to={isLoggedIn ? "/customer" : "/login"} />} />
+                    <Route path="/login" element={isLoggedIn ? <Navigate to="/customer" /> : <LoginPage handleLogin={handleLogin} />} />
+                    <Route path="/customer" element={isLoggedIn ? <Customer /> : <Navigate to="/login" />} />
+                    <Route path="*" element={<Navigate to={isLoggedIn ? "/customer" : "/login"} />} />
                 </Routes>
             </main>
         </>
