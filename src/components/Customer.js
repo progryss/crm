@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { ResizableBox } from "react-resizable";
 import "react-resizable/css/styles.css";
-import CustomerDetails from "./CustomerDetails"; // Import the CustomerDetails component
-import AddCustomer from "./AddCustomer"; // Import the AddCustomer component
+import CustomerDetails from "./CustomerDetails";
+import AddCustomer from "./AddCustomer";
 
 export default function Customer() {
   const [columns, setColumns] = useState([]);
   const [data, setData] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
   const [apiKeys, setApiKeys] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -15,39 +16,58 @@ export default function Customer() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(5);
   const [columnWidths, setColumnWidths] = useState({});
-  const [viewingCustomer, setViewingCustomer] = useState(null); // State for the selected customer
-  const [addingCustomer, setAddingCustomer] = useState(false); // State for adding customer
+  const [viewingCustomer, setViewingCustomer] = useState(null);
+  const [addingCustomer, setAddingCustomer] = useState(false); 
   const tableHeaderRef = useRef(null);
 
-  useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then(response => response.json())
-      .then(data => {
-        if (data.length > 0) {
-          const keys = Object.keys(data[0]).filter(key => key !== 'id');
-          const initialColumns = [
-            { id: 'serialNumber', title: 'Sr No.' },
-            { id: 'selectAll', title: 'Select All' },
-            ...keys.map(key => ({
-              id: key,
-              title: key.charAt(0).toUpperCase() + key.slice(1)
-            }))
-          ];
-          const savedColumns = JSON.parse(localStorage.getItem('columns'));
-          if (savedColumns) {
-            setColumns(savedColumns);
-          } else {
-            setColumns(initialColumns);
-          }
-          setApiKeys(keys);
-          setData(data);
-        }
+  const searchItems = (searchValue) => {
+    if (searchValue !== '') {
+      const filteredData = data.filter((item) => {
+        return (
+          item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+          item.phone.toLowerCase().includes(searchValue.toLowerCase()) ||
+          item.email.toLowerCase().includes(searchValue.toLowerCase())
+        );
       });
-    const savedWidths = JSON.parse(localStorage.getItem('columnWidths'));
-    if (savedWidths) {
-      setColumnWidths(savedWidths);
+      setFilteredResults(filteredData);
+    } else {
+      setFilteredResults(data);
     }
-  }, []);
+    setCurrentPage(1);
+  };
+  
+
+useEffect(() => {
+  fetch("https://jsonplaceholder.typicode.com/users")
+    .then(response => response.json())
+    .then(data => {
+      if (data.length > 0) {
+        const keys = Object.keys(data[0]).filter(key => key !== 'id');
+        const initialColumns = [
+          { id: 'serialNumber', title: 'Sr No.' },
+          { id: 'selectAll', title: 'Select All' },
+          ...keys.map(key => ({
+            id: key,
+            title: key.charAt(0).toUpperCase() + key.slice(1)
+          }))
+        ];
+        const savedColumns = JSON.parse(localStorage.getItem('columns'));
+        if (savedColumns) {
+          setColumns(savedColumns);
+        } else {
+          setColumns(initialColumns);
+        }
+        const enrichedData = data.map((item, index) => ({ ...item, originalIndex: index }));
+        setApiKeys(keys);
+        setData(enrichedData);
+        setFilteredResults(enrichedData);
+      }
+    });
+  const savedWidths = JSON.parse(localStorage.getItem('columnWidths'));
+  if (savedWidths) {
+    setColumnWidths(savedWidths);
+  }
+}, []);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -103,12 +123,14 @@ export default function Customer() {
       return 0;
     });
     setData(sortedData);
+    setFilteredResults(sortedData); // Update filteredResults with sorted data
   };
 
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const currentRows = filteredResults.slice(indexOfFirstRow, indexOfLastRow);
+  
+  const totalPages = Math.ceil(filteredResults.length / rowsPerPage);
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -177,6 +199,7 @@ export default function Customer() {
                           type="text"
                           className="form-control bg-custom border-end-0 search-input"
                           placeholder="Search Customer"
+                          onChange={(e) => searchItems(e.target.value)}
                         />
                         <div className="input-group-append">
                           <button
@@ -277,72 +300,90 @@ export default function Customer() {
                   </Droppable>
                 </thead>
                 <tbody>
-                  {currentRows.map((row, rowIndex) => (
-                    <tr key={row.id} onClick={() => setViewingCustomer(row)} style={{ cursor: "pointer" }}>
-                      {columns.map((column) => {
-                        if (column.id === 'serialNumber') {
-                          return (
-                            <td key={column.id}>{indexOfFirstRow + rowIndex + 1}</td>
-                          );
-                        } else if (column.id === 'selectAll') {
-                          return (
-                            <td key={column.id}>
-                              <input
-                                type="checkbox"
-                                checked={selectedRows.includes(row.id)}
-                                onChange={() => handleSelectRow(row.id)}
-                              />
-                            </td>
-                          );
-                        } else {
-                          return (
-                            <td key={column.id}>
-                              {row[column.id] && typeof row[column.id] === 'object' ? (
-                                <div>
-                                  {column.id === 'address' && (
-                                    <div>
-                                      <div>Street: {row[column.id].street}</div>
-                                      <div>Suite: {row[column.id].suite}</div>
-                                      <div>City: {row[column.id].city}</div>
-                                      <div>Zipcode: {row[column.id].zipcode}</div>
-                                    </div>
-                                  )}
-                                  {column.id === 'company' && (
-                                    <div>
-                                      <div>Name: {row[column.id].name}</div>
-                                      <div>Catch Phrase: {row[column.id].catchPhrase}</div>
-                                      <div>Business: {row[column.id].bs}</div>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                row[column.id]
-                              )}
-                            </td>
-                          );
-                        }
-                      })}
-                    </tr>
-                  ))}
+                {currentRows.length > 0 ? (
+  currentRows.map((row) => (
+    <tr key={row.id} onClick={(e) => {
+      // Check if the click is on the checkbox column
+      const target = e.target;
+      const isCheckbox = target.tagName.toLowerCase() === 'input' && target.type === 'checkbox';
+      if (!isCheckbox) {
+        setViewingCustomer(row);
+      }
+    }} style={{ cursor: "pointer" }}>
+      {columns.map((column) => {
+        if (column.id === 'serialNumber') {
+          return (
+            <td key={column.id}>{row.originalIndex + 1}</td>
+          );
+        } else if (column.id === 'selectAll') {
+          return (
+            <td key={column.id}>
+              <input
+                type="checkbox"
+                checked={selectedRows.includes(row.id)}
+                onChange={() => handleSelectRow(row.id)}
+              />
+            </td>
+          );
+        } else {
+          return (
+            <td key={column.id}>
+              {row[column.id] && typeof row[column.id] === 'object' ? (
+                <div>
+                  {column.id === 'address' && (
+                    <div>
+                      <div>Street: {row[column.id].street}</div>
+                      <div>Suite: {row[column.id].suite}</div>
+                      <div>City: {row[column.id].city}</div>
+                      <div>Zipcode: {row[column.id].zipcode}</div>
+                    </div>
+                  )}
+                  {column.id === 'company' && (
+                    <div>
+                      <div>Name: {row[column.id].name}</div>
+                      <div>Catch Phrase: {row[column.id].catchPhrase}</div>
+                      <div>Business: {row[column.id].bs}</div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                row[column.id]
+              )}
+            </td>
+          );
+        }
+      })}
+    </tr>
+  ))
+) : (
+  <tr>
+    <td colSpan={columns.length} className="text-center">
+      No results found
+    </td>
+  </tr>
+)}
+
                 </tbody>
               </table>
             </DragDropContext>
           </div>
-          <nav className="mt-3">
-            <ul className="customer-pagination pagination justify-content-center">
-              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={handlePrevPage}><i className="fa fa-chevron-left"></i></button>
-              </li>
-              {Array.from({ length: totalPages }, (_, index) => (
-                <li key={index} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
-                  <button className="page-link" onClick={() => { setCurrentPage(index + 1); window.scrollTo({ top: tableHeaderRef.current.offsetTop, behavior: 'smooth' }); }}>{index + 1}</button>
+          {filteredResults.length > 0 && (
+            <nav className="mt-3">
+              <ul className="customer-pagination pagination justify-content-center">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <button className="page-link" onClick={handlePrevPage}><i className="fa fa-chevron-left"></i></button>
                 </li>
-              ))}
-              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={handleNextPage}><i className="fa fa-chevron-right"></i></button>
-              </li>
-            </ul>
-          </nav>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <li key={index} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                    <button className="page-link" onClick={() => { setCurrentPage(index + 1); window.scrollTo({ top: tableHeaderRef.current.offsetTop, behavior: 'smooth' }); }}>{index + 1}</button>
+                  </li>
+                ))}
+                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                  <button className="page-link" onClick={handleNextPage}><i className="fa fa-chevron-right"></i></button>
+                </li>
+              </ul>
+            </nav>
+          )}
         </div>
       </div>
     </div>

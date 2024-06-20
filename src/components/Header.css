@@ -309,3 +309,10 @@ color: #858383;
 input:focus,textarea:focus,select:focus{
   box-shadow:none!important;
 }
+select{
+  height:38px;
+}
+select,textarea,input{
+  font-size:15px!important;
+  appearance: auto!important;
+}
