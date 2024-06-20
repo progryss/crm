@@ -1,3 +1,31 @@
+# Login Credentials
+
+To access the application, use the following login credentials:
+
+Username: crm
+Password: CRM
+
+# Changing the Login Credentials
+
+If you need to change the default login credentials, follow these steps:
+
+1. Open the LoginPage.js file located in your project directory.
+
+2. Locate the following lines of code:
+
+   const validUsername = 'crm';
+   const validPassword = 'CRM';
+
+3. Change the values of validUsername and validPassword to your desired credentials. For example:
+
+   const validUsername = 'newUsername';
+   const validPassword = 'newPassword';
+
+4. Save the changes to the LoginPage.js file.
+
+By following these steps, you can easily update the login credentials to meet your requirements.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -316,3 +316,18 @@ select,textarea,input{
   font-size:15px!important;
   appearance: auto!important;
 }
+.custom-header-css .dropdown-menu.show li a{
+  text-decoration:none;
+}
+.dropdown-menu li .dropdown-item{
+  background:none;
+  color:#000000!important;
+}
+.dropdown-menu li:hover .dropdown-item{
+  background:none;
+  font-weight:600;
+}
+.login-box-width{
+  width:350px;
+  max-width:100%;
+}

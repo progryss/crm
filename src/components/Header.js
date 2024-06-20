@@ -1,8 +1,8 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Link } from 'react-router-dom';
 import './Header.css';
 
-const Header = () => {
+const Header = ({ handleLogout }) => {
     const location = useLocation();
 
     return (
@@ -16,12 +16,10 @@ const Header = () => {
                             </div>
                             <div className="dropdown">
                                 <span className="user-name dropdown-toggle" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                    John Doe <i className="fas fa-user-circle"></i>
+                                    Admin <i className="fas fa-user-circle"></i>
                                 </span>
                                 <ul className="dropdown-menu" aria-labelledby="userMenu">
-                                    <li><button className="dropdown-item">My Profile</button></li>
-                                    <li><button className="dropdown-item">Edit Profile</button></li>
-                                    <li><button className="dropdown-item">Logout</button></li>
+                                    <li> <Link to="/login" onClick={handleLogout}><button className="dropdown-item">Logout</button></Link></li>
                                 </ul>
                             </div>
                         </div>

@@ -19,14 +19,14 @@ export default function Customer() {
   const [viewingCustomer, setViewingCustomer] = useState(null);
   const [addingCustomer, setAddingCustomer] = useState(false); 
   const tableHeaderRef = useRef(null);
-
   const searchItems = (searchValue) => {
     if (searchValue !== '') {
       const filteredData = data.filter((item) => {
         return (
           item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
           item.phone.toLowerCase().includes(searchValue.toLowerCase()) ||
-          item.email.toLowerCase().includes(searchValue.toLowerCase())
+          item.email.toLowerCase().includes(searchValue.toLowerCase()) ||
+          item.website.toLowerCase().includes(searchValue.toLowerCase())
         );
       });
       setFilteredResults(filteredData);
@@ -68,7 +68,6 @@ useEffect(() => {
     setColumnWidths(savedWidths);
   }
 }, []);
-
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const updatedColumns = Array.from(columns);
