@@ -331,3 +331,39 @@ select,textarea,input{
   width:350px;
   max-width:100%;
 }
+
+
+
+
+.notification-popup {
+  position: fixed;
+  top: 5px;
+  font-size:14px;
+  right: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  visibility: visible;
+  opacity: 1;
+  background-color: var(--bg-color, #ffffff); 
+  color: var(--text-color, #000000); 
+}
+.progress-bar {
+  height: 4px; 
+  width: 0%; 
+  background-color: #007bff; 
+  margin-top: 5px;
+}
+
+
+
+.close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
