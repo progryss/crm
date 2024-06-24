@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
+import NotificationPopup from "./NotificationPopup"; // Adjust the path if necessary
 
 function CustomerDetails({ customer, onBack }) {
   const [comment, setComment] = useState("");
   const [commentsList, setCommentsList] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingComment, setEditingComment] = useState("");
+
+  const [notificationVisible, setNotificationVisible] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState("");
+  const [notificationBgColor, setNotificationBgColor] = useState("");
+  const [notificationColor, setNotificationColor] = useState("");
 
   const localStorageKey = `comments_${customer.id || customer.name}`;
 
@@ -30,6 +37,17 @@ function CustomerDetails({ customer, onBack }) {
       setCommentsList(updatedCommentsList);
       setComment(""); 
       localStorage.setItem(localStorageKey, JSON.stringify(updatedCommentsList));
+      setNotificationMessage("Comment added successfully!");
+      setNotificationType("success");
+      setNotificationBgColor("green");
+      setNotificationColor("white");
+      setNotificationVisible(true);
+    } else {
+      setNotificationMessage("Comment cannot be empty.");
+      setNotificationType("error");
+      setNotificationBgColor("red");
+      setNotificationColor("white");
+      setNotificationVisible(true);
     }
   };
 
@@ -37,6 +55,11 @@ function CustomerDetails({ customer, onBack }) {
     const updatedCommentsList = commentsList.filter((_, i) => i !== index);
     setCommentsList(updatedCommentsList);
     localStorage.setItem(localStorageKey, JSON.stringify(updatedCommentsList));
+          setNotificationMessage("Delete Comment successfully!");
+          setNotificationType("success");
+          setNotificationBgColor("#000000");
+          setNotificationColor("white");
+          setNotificationVisible(true);
   };
 
   const handleCommentEdit = (index) => {
@@ -53,6 +76,8 @@ function CustomerDetails({ customer, onBack }) {
       setEditingIndex(null);
       setEditingComment("");
       localStorage.setItem(localStorageKey, JSON.stringify(updatedCommentsList));
+          setNotificationMessage("Edit Comment successfully!");
+    setNotificationVisible(true);
     }
   };
 
@@ -68,8 +93,8 @@ function CustomerDetails({ customer, onBack }) {
     <div className="container-fluid customer-details">
       <div className="card mb-3">
         <div className="card-body p-0">
-          <div className="bg-light  add-cutomer-section px-3 py-4">
-        <div className="row">
+          <div className="bg-light add-cutomer-section px-3 py-4">
+            <div className="row">
               <div className="col-lg-12">
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="d-flex align-items-center gap-2">
@@ -82,39 +107,39 @@ function CustomerDetails({ customer, onBack }) {
                 </div>
               </div>
             </div>
-            </div>
+          </div>
           <div className="d-flex gap-5 align-items-center p-3">
-          <div>
-                  <div className="label-title">Name:</div>
-                  <div className="label-value">{customer.name}</div>
-                </div>
-                <div>
-                  <div className="label-title">Phone Number:</div>
-                  <div className="label-value">{customer.phone}</div>
-                </div>
-                <div>
-                  <div className="label-title">Email:</div>
-                  <div className="label-value">{customer.email}</div>
-                </div>
+            <div>
+              <div className="label-title">Name:</div>
+              <div className="label-value">{customer.name}</div>
+            </div>
+            <div>
+              <div className="label-title">Phone Number:</div>
+              <div className="label-value">{customer.phone}</div>
+            </div>
+            <div>
+              <div className="label-title">Email:</div>
+              <div className="label-value">{customer.email}</div>
+            </div>
           </div>
         </div>
       </div>
-  <div className="card mb-3 status-card">
-<div className="card-body">
-<div className="d-flex justify-content-between gap-2">
-  <div className="status-card-list">
-  <ul>
-    <li>Step 1</li>
-    <li>Step 2</li>
-    <li>Nurturing</li>
-    <li>Unqualified</li>
-    <li>Converted</li>
-  </ul>
-  </div>
-  <div><button className="btn rounded-pill btn-primary">Mark Status as Complete</button></div>
-</div>
-</div>
-</div>
+      <div className="card mb-3 status-card">
+        <div className="card-body">
+          <div className="d-flex justify-content-between gap-2">
+            <div className="status-card-list">
+              <ul>
+                <li>Step 1</li>
+                <li>Step 2</li>
+                <li>Nurturing</li>
+                <li>Unqualified</li>
+                <li>Converted</li>
+              </ul>
+            </div>
+            <div><button className="btn rounded-pill btn-primary">Mark Status as Complete</button></div>
+          </div>
+        </div>
+      </div>
       <div className="customer-details-grid">
         <div className="card mb-3">
           <div className="card-body">
@@ -153,7 +178,6 @@ function CustomerDetails({ customer, onBack }) {
             </div>
           </div>
         </div>
-
         <div className="card mb-3">
           <div className="card-body">
             <div className="textarea-box">
@@ -201,8 +225,8 @@ function CustomerDetails({ customer, onBack }) {
                         ) : (
                           <>
                             <div>
-                            <div className="comment-text mb-2">{comment.text}</div>
-                            <div className="comment-timestamp">{comment.timestamp}</div>
+                              <div className="comment-text mb-2">{comment.text}</div>
+                              <div className="comment-timestamp">{comment.timestamp}</div>
                             </div>
                             <div>
                               <button
@@ -229,6 +253,14 @@ function CustomerDetails({ customer, onBack }) {
           </div>
         </div>
       </div>
+      <NotificationPopup
+        message={notificationMessage}
+        type={notificationType}
+        visible={notificationVisible}
+        onClose={() => setNotificationVisible(false)}
+        bgColor={notificationBgColor}
+        color={notificationColor}
+      />
     </div>
   );
 }

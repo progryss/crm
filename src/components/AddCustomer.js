@@ -5,13 +5,18 @@ export default function AddCustomer({ onBack }) {
   const [comment, setComment] = useState("");
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingComment, setEditingComment] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [country, setCountry] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleCommentChange = (event) => {
     setComment(event.target.value);
   };
 
   const handleCommentSubmit = () => {
-    if (comment.trim() !== "") {
+    if (comment.trim()!== "") {
       const newComment = {
         text: comment,
         timestamp: new Date().toLocaleString(),
@@ -31,7 +36,7 @@ export default function AddCustomer({ onBack }) {
   };
 
   const handleEditSubmit = (index) => {
-    if (editingComment.trim() !== "") {
+    if (editingComment.trim()!== "") {
       const updatedComments = [...commentsList];
       updatedComments[index].text = editingComment;
       setCommentsList(updatedComments);
@@ -44,6 +49,19 @@ export default function AddCustomer({ onBack }) {
     const updatedComments = [...commentsList];
     updatedComments.splice(index, 1);
     setCommentsList(updatedComments);
+  };
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    const customerData = {
+      name: customerName,
+      country: country,
+      phoneNumber: phoneNumber,
+      email: email,
+      message: message,
+      comments: commentsList,
+    };
+    console.log(customerData);
   };
 
   return (
@@ -65,7 +83,7 @@ export default function AddCustomer({ onBack }) {
               </div>
             </div>
           </div>
-          <form>
+          <form onSubmit={handleFormSubmit}>
             <div className="customer-details-grid">
               <div className="card m-4 me-0">
                 <div className="card-body">
@@ -78,6 +96,8 @@ export default function AddCustomer({ onBack }) {
                             type="text"
                             className="form-control"
                             id="customerName"
+                            value={customerName}
+                            onChange={(event) => setCustomerName(event.target.value)}
                             placeholder="Enter customer's name"
                           />
                         </div>
@@ -86,6 +106,8 @@ export default function AddCustomer({ onBack }) {
                           <select
                             className="form-control"
                             id="country"
+                            value={country}
+                            onChange={(event) => setCountry(event.target.value)}
                           >
                             <option value="">Select Country</option>
                             <option value="India">India</option>
@@ -102,6 +124,8 @@ export default function AddCustomer({ onBack }) {
                             type="number"
                             className="form-control"
                             id="phoneNumber"
+                            value={phoneNumber}
+                            onChange={(event) => setPhoneNumber(event.target.value)}
                             placeholder="Enter phone number"
                           />
                         </div>
@@ -111,20 +135,24 @@ export default function AddCustomer({ onBack }) {
                             type="email"
                             className="form-control"
                             id="email"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
                             placeholder="Enter email address"
                           />
                         </div>
                       </div>
                     </div>
                     <div className="mb-4">
-                          <label htmlFor="message" className="form-label label-value">Message</label>
-                          <textarea
-                            className="form-control"
-                            id="message"
-                            rows="4"
-                            placeholder="Write your message here..."
-                          ></textarea>
-                        </div>
+                      <label htmlFor="message" className="form-label label-value">Message</label>
+                      <textarea
+                        className="form-control"
+                        id="message"
+                        rows="4"
+                        value={message}
+                        onChange={(event) => setMessage(event.target.value)}
+                        placeholder="Write your message here..."
+                      ></textarea>
+                    </div>
                     <button
                       type="submit"
                       className="btn btn-success"
@@ -158,7 +186,7 @@ export default function AddCustomer({ onBack }) {
                         {commentsList.map((comment, index) => (
                           <div key={index} className="card mb-3">
                             <div className="card-body d-flex justify-content-between align-items-center">
-                              {editingIndex === index ? (
+                              {editingIndex === index? (
                                 <div className="w-100">
                                   <textarea
                                     rows="2"

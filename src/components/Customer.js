@@ -20,6 +20,7 @@ export default function Customer() {
   const [viewingCustomer, setViewingCustomer] = useState(null);
   const [addingCustomer, setAddingCustomer] = useState(false);
   const tableHeaderRef = useRef(null);
+  
   const searchItems = (searchValue) => {
     if (searchValue !== '') {
       const filteredData = data.filter((item) => {
@@ -68,10 +69,7 @@ export default function Customer() {
     if (savedWidths) {
       setColumnWidths(savedWidths);
     }
-    setTrigger(false);
-  }, [trigger]);
-
-
+  }, []);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -111,21 +109,36 @@ export default function Customer() {
     setSelectAll(newSelectedRows.length === data.length);
   };
 
+  const isDate = (value) => {
+    return !isNaN(Date.parse(value));
+  };
+
   const handleSort = (columnId) => {
     let direction = 'ascending';
     if (sortConfig.key === columnId && sortConfig.direction === 'ascending') {
       direction = 'descending';
     }
     setSortConfig({ key: columnId, direction });
+
     const sortedData = [...data].sort((a, b) => {
-      if (a[columnId] < b[columnId]) {
+      let aValue = a[columnId];
+      let bValue = b[columnId];
+
+      // Check if the values are dates
+      if (isDate(aValue) && isDate(bValue)) {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      }
+
+      if (aValue < bValue) {
         return direction === 'ascending' ? -1 : 1;
       }
-      if (a[columnId] > b[columnId]) {
+      if (aValue > bValue) {
         return direction === 'ascending' ? 1 : -1;
       }
       return 0;
     });
+    
     setData(sortedData);
     setFilteredResults(sortedData); // Update filteredResults with sorted data
   };
@@ -315,9 +328,8 @@ export default function Customer() {
                 </thead>
                 <tbody>
                   {currentRows.length > 0 ? (
-                    currentRows.map((row) => (
+                    currentRows.map((row, rowIndex) => (
                       <tr key={row.id} onClick={(e) => {
-                        // Check if the click is on the checkbox column
                         const target = e.target;
                         const isCheckbox = target.tagName.toLowerCase() === 'input' && target.type === 'checkbox';
                         if (!isCheckbox) {
@@ -327,7 +339,7 @@ export default function Customer() {
                         {columns.map((column) => {
                           if (column.id === 'serialNumber') {
                             return (
-                              <td key={column.id}>{row.originalIndex + 1}</td>
+                              <td key={column.id}>{indexOfFirstRow + rowIndex + 1}</td>
                             );
                           } else if (column.id === 'selectAll') {
                             return (
@@ -376,7 +388,6 @@ export default function Customer() {
                       </td>
                     </tr>
                   )}
-
                 </tbody>
               </table>
             </DragDropContext>
