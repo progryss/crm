@@ -129,7 +129,7 @@ function CustomerDetails({ customer, onBack }) {
                 </div>
                 <div className="mb-4">
                   <div className="label-title">Country:</div>
-                  <div className="label-value">{address}</div>
+                  <div className="label-value">{customer.country}</div>
                 </div>
                 <div className="mb-4">
                   <div className="label-title">Message:</div>
@@ -144,6 +144,10 @@ function CustomerDetails({ customer, onBack }) {
                 <div className="mb-4">
                   <div className="label-title">Email:</div>
                   <div className="label-value">{customer.email}</div>
+                </div>
+                <div className="mb-4">
+                  <div className="label-title">Page URL:</div>
+                  <div className="label-value">{customer.page_url || "N/A"}</div>
                 </div>
               </div>
             </div>

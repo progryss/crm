@@ -6,6 +6,7 @@ import CustomerDetails from "./CustomerDetails";
 import AddCustomer from "./AddCustomer";
 
 export default function Customer() {
+  const [trigger, setTrigger] = useState(false);
   const [columns, setColumns] = useState([]);
   const [data, setData] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -17,7 +18,7 @@ export default function Customer() {
   const [rowsPerPage] = useState(5);
   const [columnWidths, setColumnWidths] = useState({});
   const [viewingCustomer, setViewingCustomer] = useState(null);
-  const [addingCustomer, setAddingCustomer] = useState(false); 
+  const [addingCustomer, setAddingCustomer] = useState(false);
   const tableHeaderRef = useRef(null);
   const searchItems = (searchValue) => {
     if (searchValue !== '') {
@@ -25,8 +26,7 @@ export default function Customer() {
         return (
           item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
           item.phone.toLowerCase().includes(searchValue.toLowerCase()) ||
-          item.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-          item.website.toLowerCase().includes(searchValue.toLowerCase())
+          item.email.toLowerCase().includes(searchValue.toLowerCase()) 
         );
       });
       setFilteredResults(filteredData);
@@ -35,39 +35,44 @@ export default function Customer() {
     }
     setCurrentPage(1);
   };
-  
 
-useEffect(() => {
-  fetch("https://jsonplaceholder.typicode.com/users")
-    .then(response => response.json())
-    .then(data => {
-      if (data.length > 0) {
-        const keys = Object.keys(data[0]).filter(key => key !== 'id');
-        const initialColumns = [
-          { id: 'serialNumber', title: 'Sr No.' },
-          { id: 'selectAll', title: 'Select All' },
-          ...keys.map(key => ({
-            id: key,
-            title: key.charAt(0).toUpperCase() + key.slice(1)
-          }))
-        ];
-        const savedColumns = JSON.parse(localStorage.getItem('columns'));
-        if (savedColumns) {
-          setColumns(savedColumns);
-        } else {
-          setColumns(initialColumns);
+  const serverURL = "http://localhost:4000";
+
+  useEffect(() => {
+    fetch(`${serverURL}/get-enquiries`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.length > 0) {
+          const keys = Object.keys(data[0]).filter(key => key !== 'id');
+          const initialColumns = [
+            { id: 'serialNumber', title: 'Sr No.' },
+            { id: 'selectAll', title: 'Select All' },
+            ...keys.map(key => ({
+              id: key,
+              title: key.charAt(0).toUpperCase() + key.slice(1)
+            }))
+          ];
+          const savedColumns = JSON.parse(localStorage.getItem('columns'));
+          if (savedColumns) {
+            setColumns(savedColumns);
+          } else {
+            setColumns(initialColumns);
+          }
+          const enrichedData = data.map((item, index) => ({ ...item, originalIndex: index }));
+          setApiKeys(keys);
+          setData(enrichedData);
+          setFilteredResults(enrichedData);
         }
-        const enrichedData = data.map((item, index) => ({ ...item, originalIndex: index }));
-        setApiKeys(keys);
-        setData(enrichedData);
-        setFilteredResults(enrichedData);
-      }
-    });
-  const savedWidths = JSON.parse(localStorage.getItem('columnWidths'));
-  if (savedWidths) {
-    setColumnWidths(savedWidths);
-  }
-}, []);
+      });
+    const savedWidths = JSON.parse(localStorage.getItem('columnWidths'));
+    if (savedWidths) {
+      setColumnWidths(savedWidths);
+    }
+    setTrigger(false);
+  }, [trigger]);
+
+
+
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const updatedColumns = Array.from(columns);
@@ -128,7 +133,7 @@ useEffect(() => {
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = filteredResults.slice(indexOfFirstRow, indexOfLastRow);
-  
+
   const totalPages = Math.ceil(filteredResults.length / rowsPerPage);
 
   const handlePrevPage = () => {
@@ -161,7 +166,12 @@ useEffect(() => {
   if (addingCustomer) {
     return <AddCustomer onBack={() => setAddingCustomer(false)} />;
   }
-
+  const refreshEnq = async () => {
+    await fetch(`${serverURL}/update-enquiries`, {
+      method: 'POST'
+    })
+    setTrigger(true)
+  }
   return (
     <div className="container-fluid customer-container">
       <div className="card card-block border-0 customer-table-css-main">
@@ -190,7 +200,12 @@ useEffect(() => {
             <div className="row">
               <div className="col-lg-12">
                 <div className="d-flex justify-content-between align-items-center">
-                  <div className="no-of-item">{data.length} Items</div>
+                  <div>
+                    <span className="no-of-item me-3">{data.length} Items</span>
+                    <button onClick={refreshEnq} >
+                      refresh
+                    </button>
+                  </div>
                   <div>
                     <div className="d-flex gap-2">
                       <div className="input-group">
@@ -299,68 +314,68 @@ useEffect(() => {
                   </Droppable>
                 </thead>
                 <tbody>
-                {currentRows.length > 0 ? (
-  currentRows.map((row) => (
-    <tr key={row.id} onClick={(e) => {
-      // Check if the click is on the checkbox column
-      const target = e.target;
-      const isCheckbox = target.tagName.toLowerCase() === 'input' && target.type === 'checkbox';
-      if (!isCheckbox) {
-        setViewingCustomer(row);
-      }
-    }} style={{ cursor: "pointer" }}>
-      {columns.map((column) => {
-        if (column.id === 'serialNumber') {
-          return (
-            <td key={column.id}>{row.originalIndex + 1}</td>
-          );
-        } else if (column.id === 'selectAll') {
-          return (
-            <td key={column.id}>
-              <input
-                type="checkbox"
-                checked={selectedRows.includes(row.id)}
-                onChange={() => handleSelectRow(row.id)}
-              />
-            </td>
-          );
-        } else {
-          return (
-            <td key={column.id}>
-              {row[column.id] && typeof row[column.id] === 'object' ? (
-                <div>
-                  {column.id === 'address' && (
-                    <div>
-                      <div>Street: {row[column.id].street}</div>
-                      <div>Suite: {row[column.id].suite}</div>
-                      <div>City: {row[column.id].city}</div>
-                      <div>Zipcode: {row[column.id].zipcode}</div>
-                    </div>
+                  {currentRows.length > 0 ? (
+                    currentRows.map((row) => (
+                      <tr key={row.id} onClick={(e) => {
+                        // Check if the click is on the checkbox column
+                        const target = e.target;
+                        const isCheckbox = target.tagName.toLowerCase() === 'input' && target.type === 'checkbox';
+                        if (!isCheckbox) {
+                          setViewingCustomer(row);
+                        }
+                      }} style={{ cursor: "pointer" }}>
+                        {columns.map((column) => {
+                          if (column.id === 'serialNumber') {
+                            return (
+                              <td key={column.id}>{row.originalIndex + 1}</td>
+                            );
+                          } else if (column.id === 'selectAll') {
+                            return (
+                              <td key={column.id}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedRows.includes(row.id)}
+                                  onChange={() => handleSelectRow(row.id)}
+                                />
+                              </td>
+                            );
+                          } else {
+                            return (
+                              <td key={column.id}>
+                                {row[column.id] && typeof row[column.id] === 'object' ? (
+                                  <div>
+                                    {column.id === 'address' && (
+                                      <div>
+                                        <div>Street: {row[column.id].street}</div>
+                                        <div>Suite: {row[column.id].suite}</div>
+                                        <div>City: {row[column.id].city}</div>
+                                        <div>Zipcode: {row[column.id].zipcode}</div>
+                                      </div>
+                                    )}
+                                    {column.id === 'company' && (
+                                      <div>
+                                        <div>Name: {row[column.id].name}</div>
+                                        <div>Catch Phrase: {row[column.id].catchPhrase}</div>
+                                        <div>Business: {row[column.id].bs}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  row[column.id]
+                                )}
+                              </td>
+                            );
+                          }
+                        })}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={columns.length} className="text-center">
+                        No results found
+                      </td>
+                    </tr>
                   )}
-                  {column.id === 'company' && (
-                    <div>
-                      <div>Name: {row[column.id].name}</div>
-                      <div>Catch Phrase: {row[column.id].catchPhrase}</div>
-                      <div>Business: {row[column.id].bs}</div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                row[column.id]
-              )}
-            </td>
-          );
-        }
-      })}
-    </tr>
-  ))
-) : (
-  <tr>
-    <td colSpan={columns.length} className="text-center">
-      No results found
-    </td>
-  </tr>
-)}
 
                 </tbody>
               </table>

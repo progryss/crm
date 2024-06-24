@@ -29,7 +29,7 @@ const Header = ({ handleLogout }) => {
                     <div className="col">
                         <nav className="navbar navbar-expand-lg p-0 custom-navbar-css gap-3">
                             <div>
-                            <i class="fas fa-th fa-2x"></i>
+                            <i className="fas fa-th fa-2x"></i>
                             </div>
                             <ul className="navbar-nav mr-auto">
                                 <li className="nav-item">
