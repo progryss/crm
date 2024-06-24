@@ -19,6 +19,7 @@ export default function Customer() {
   const [viewingCustomer, setViewingCustomer] = useState(null);
   const [addingCustomer, setAddingCustomer] = useState(false); 
   const tableHeaderRef = useRef(null);
+  
   const searchItems = (searchValue) => {
     if (searchValue !== '') {
       const filteredData = data.filter((item) => {
@@ -35,39 +36,39 @@ export default function Customer() {
     }
     setCurrentPage(1);
   };
-  
 
-useEffect(() => {
-  fetch("https://jsonplaceholder.typicode.com/users")
-    .then(response => response.json())
-    .then(data => {
-      if (data.length > 0) {
-        const keys = Object.keys(data[0]).filter(key => key !== 'id');
-        const initialColumns = [
-          { id: 'serialNumber', title: 'Sr No.' },
-          { id: 'selectAll', title: 'Select All' },
-          ...keys.map(key => ({
-            id: key,
-            title: key.charAt(0).toUpperCase() + key.slice(1)
-          }))
-        ];
-        const savedColumns = JSON.parse(localStorage.getItem('columns'));
-        if (savedColumns) {
-          setColumns(savedColumns);
-        } else {
-          setColumns(initialColumns);
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then(response => response.json())
+      .then(data => {
+        if (data.length > 0) {
+          const keys = Object.keys(data[0]).filter(key => key !== 'id');
+          const initialColumns = [
+            { id: 'serialNumber', title: 'Sr No.' },
+            { id: 'selectAll', title: 'Select All' },
+            ...keys.map(key => ({
+              id: key,
+              title: key.charAt(0).toUpperCase() + key.slice(1)
+            }))
+          ];
+          const savedColumns = JSON.parse(localStorage.getItem('columns'));
+          if (savedColumns) {
+            setColumns(savedColumns);
+          } else {
+            setColumns(initialColumns);
+          }
+          const enrichedData = data.map((item, index) => ({ ...item, originalIndex: index }));
+          setApiKeys(keys);
+          setData(enrichedData);
+          setFilteredResults(enrichedData);
         }
-        const enrichedData = data.map((item, index) => ({ ...item, originalIndex: index }));
-        setApiKeys(keys);
-        setData(enrichedData);
-        setFilteredResults(enrichedData);
-      }
-    });
-  const savedWidths = JSON.parse(localStorage.getItem('columnWidths'));
-  if (savedWidths) {
-    setColumnWidths(savedWidths);
-  }
-}, []);
+      });
+    const savedWidths = JSON.parse(localStorage.getItem('columnWidths'));
+    if (savedWidths) {
+      setColumnWidths(savedWidths);
+    }
+  }, []);
+
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const updatedColumns = Array.from(columns);
@@ -106,21 +107,36 @@ useEffect(() => {
     setSelectAll(newSelectedRows.length === data.length);
   };
 
+  const isDate = (value) => {
+    return !isNaN(Date.parse(value));
+  };
+
   const handleSort = (columnId) => {
     let direction = 'ascending';
     if (sortConfig.key === columnId && sortConfig.direction === 'ascending') {
       direction = 'descending';
     }
     setSortConfig({ key: columnId, direction });
+
     const sortedData = [...data].sort((a, b) => {
-      if (a[columnId] < b[columnId]) {
+      let aValue = a[columnId];
+      let bValue = b[columnId];
+
+      // Check if the values are dates
+      if (isDate(aValue) && isDate(bValue)) {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      }
+
+      if (aValue < bValue) {
         return direction === 'ascending' ? -1 : 1;
       }
-      if (a[columnId] > b[columnId]) {
+      if (aValue > bValue) {
         return direction === 'ascending' ? 1 : -1;
       }
       return 0;
     });
+    
     setData(sortedData);
     setFilteredResults(sortedData); // Update filteredResults with sorted data
   };
@@ -299,69 +315,67 @@ useEffect(() => {
                   </Droppable>
                 </thead>
                 <tbody>
-                {currentRows.length > 0 ? (
-  currentRows.map((row) => (
-    <tr key={row.id} onClick={(e) => {
-      // Check if the click is on the checkbox column
-      const target = e.target;
-      const isCheckbox = target.tagName.toLowerCase() === 'input' && target.type === 'checkbox';
-      if (!isCheckbox) {
-        setViewingCustomer(row);
-      }
-    }} style={{ cursor: "pointer" }}>
-      {columns.map((column) => {
-        if (column.id === 'serialNumber') {
-          return (
-            <td key={column.id}>{row.originalIndex + 1}</td>
-          );
-        } else if (column.id === 'selectAll') {
-          return (
-            <td key={column.id}>
-              <input
-                type="checkbox"
-                checked={selectedRows.includes(row.id)}
-                onChange={() => handleSelectRow(row.id)}
-              />
-            </td>
-          );
-        } else {
-          return (
-            <td key={column.id}>
-              {row[column.id] && typeof row[column.id] === 'object' ? (
-                <div>
-                  {column.id === 'address' && (
-                    <div>
-                      <div>Street: {row[column.id].street}</div>
-                      <div>Suite: {row[column.id].suite}</div>
-                      <div>City: {row[column.id].city}</div>
-                      <div>Zipcode: {row[column.id].zipcode}</div>
-                    </div>
+                  {currentRows.length > 0 ? (
+                    currentRows.map((row, rowIndex) => (
+                      <tr key={row.id} onClick={(e) => {
+                        const target = e.target;
+                        const isCheckbox = target.tagName.toLowerCase() === 'input' && target.type === 'checkbox';
+                        if (!isCheckbox) {
+                          setViewingCustomer(row);
+                        }
+                      }} style={{ cursor: "pointer" }}>
+                        {columns.map((column) => {
+                          if (column.id === 'serialNumber') {
+                            return (
+                              <td key={column.id}>{indexOfFirstRow + rowIndex + 1}</td>
+                            );
+                          } else if (column.id === 'selectAll') {
+                            return (
+                              <td key={column.id}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedRows.includes(row.id)}
+                                  onChange={() => handleSelectRow(row.id)}
+                                />
+                              </td>
+                            );
+                          } else {
+                            return (
+                              <td key={column.id}>
+                                {row[column.id] && typeof row[column.id] === 'object' ? (
+                                  <div>
+                                    {column.id === 'address' && (
+                                      <div>
+                                        <div>Street: {row[column.id].street}</div>
+                                        <div>Suite: {row[column.id].suite}</div>
+                                        <div>City: {row[column.id].city}</div>
+                                        <div>Zipcode: {row[column.id].zipcode}</div>
+                                      </div>
+                                    )}
+                                    {column.id === 'company' && (
+                                      <div>
+                                        <div>Name: {row[column.id].name}</div>
+                                        <div>Catch Phrase: {row[column.id].catchPhrase}</div>
+                                        <div>Business: {row[column.id].bs}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  row[column.id]
+                                )}
+                              </td>
+                            );
+                          }
+                        })}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={columns.length} className="text-center">
+                        No results found
+                      </td>
+                    </tr>
                   )}
-                  {column.id === 'company' && (
-                    <div>
-                      <div>Name: {row[column.id].name}</div>
-                      <div>Catch Phrase: {row[column.id].catchPhrase}</div>
-                      <div>Business: {row[column.id].bs}</div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                row[column.id]
-              )}
-            </td>
-          );
-        }
-      })}
-    </tr>
-  ))
-) : (
-  <tr>
-    <td colSpan={columns.length} className="text-center">
-      No results found
-    </td>
-  </tr>
-)}
-
                 </tbody>
               </table>
             </DragDropContext>
