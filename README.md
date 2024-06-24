@@ -1,3 +1,11 @@
+# To Add NotificationPopup in any Component 
+
+1. import { useNotification } from "./NotificationContext";
+
+2. const { showNotification } = useNotification(); 
+
+3.  showNotification('Message - Comment added successfully!', 'Type- success', 'Bg-Color - green', 'Color - white');
+
 # Login Credentials
 
 To access the application, use the following login credentials:

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNotification } from "./NotificationContext"; // Adjust the path if necessary
 
 export default function AddCustomer({ onBack }) {
   const [commentsList, setCommentsList] = useState([]);
@@ -11,12 +12,14 @@ export default function AddCustomer({ onBack }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
+  const { showNotification } = useNotification();
+
   const handleCommentChange = (event) => {
     setComment(event.target.value);
   };
 
   const handleCommentSubmit = () => {
-    if (comment.trim()!== "") {
+    if (comment.trim() !== "") {
       const newComment = {
         text: comment,
         timestamp: new Date().toLocaleString(),
@@ -36,7 +39,7 @@ export default function AddCustomer({ onBack }) {
   };
 
   const handleEditSubmit = (index) => {
-    if (editingComment.trim()!== "") {
+    if (editingComment.trim() !== "") {
       const updatedComments = [...commentsList];
       updatedComments[index].text = editingComment;
       setCommentsList(updatedComments);
@@ -61,6 +64,9 @@ export default function AddCustomer({ onBack }) {
       message: message,
       comments: commentsList,
     };
+
+    // Simulate success notification
+    showNotification('Customer added successfully!', 'success', 'green', 'white');
     console.log(customerData);
   };
 
@@ -186,7 +192,7 @@ export default function AddCustomer({ onBack }) {
                         {commentsList.map((comment, index) => (
                           <div key={index} className="card mb-3">
                             <div className="card-body d-flex justify-content-between align-items-center">
-                              {editingIndex === index? (
+                              {editingIndex === index ? (
                                 <div className="w-100">
                                   <textarea
                                     rows="2"

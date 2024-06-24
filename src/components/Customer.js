@@ -281,7 +281,7 @@ export default function Customer() {
                                   height={23}
                                   axis="x"
                                   minConstraints={[50, 30]}
-                                  maxConstraints={[5000, 23]}
+                                  maxConstraints={[200, 23]}
                                   resizeHandles={["e"]}
                                   className="resize-handle"
                                   onResizeStop={(e, data) => handleResize(column.id, data.size.width)}

@@ -235,12 +235,13 @@ font-weight: 500;
 color: #858383;
 }
 
-.truncate-text {
+/* .truncate-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 150px; /* Adjust max-width as per your design */
-}
+  max-width: 150px; 
+} */
+
 
 .customer-details-grid{
   display:grid;
