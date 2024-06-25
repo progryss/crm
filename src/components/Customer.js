@@ -6,7 +6,6 @@ import CustomerDetails from "./CustomerDetails";
 import AddCustomer from "./AddCustomer";
 
 export default function Customer() {
-  const [trigger, setTrigger] = useState(false);
   const [columns, setColumns] = useState([]);
   const [data, setData] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -37,10 +36,10 @@ export default function Customer() {
     setCurrentPage(1);
   };
 
-  const serverURL = "http://localhost:4000";
+  const baseURL = process.env.REACT_APP_SERVER_URL;
 
   useEffect(() => {
-    fetch(`${serverURL}/get-enquiries`)
+    fetch(`${baseURL}/get-enquiries`)
       .then(response => response.json())
       .then(data => {
         if (data.length > 0) {
@@ -179,12 +178,7 @@ export default function Customer() {
   if (addingCustomer) {
     return <AddCustomer onBack={() => setAddingCustomer(false)} />;
   }
-  const refreshEnq = async () => {
-    await fetch(`${serverURL}/update-enquiries`, {
-      method: 'POST'
-    })
-    setTrigger(true)
-  }
+
   return (
     <div className="container-fluid customer-container">
       <div className="card card-block border-0 customer-table-css-main">
@@ -215,9 +209,6 @@ export default function Customer() {
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
                     <span className="no-of-item me-3">{data.length} Items</span>
-                    <button onClick={refreshEnq} >
-                      refresh
-                    </button>
                   </div>
                   <div>
                     <div className="d-flex gap-2">

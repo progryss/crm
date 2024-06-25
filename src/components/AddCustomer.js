@@ -1,6 +1,12 @@
 import React, { useState } from "react";
+import axios from 'axios';
+
+
 
 export default function AddCustomer({ onBack }) {
+  
+  const baseURL = process.env.REACT_APP_SERVER_URL;
+
   const [commentsList, setCommentsList] = useState([]);
   const [comment, setComment] = useState("");
   const [editingIndex, setEditingIndex] = useState(null);
@@ -16,7 +22,7 @@ export default function AddCustomer({ onBack }) {
   };
 
   const handleCommentSubmit = () => {
-    if (comment.trim()!== "") {
+    if (comment.trim() !== "") {
       const newComment = {
         text: comment,
         timestamp: new Date().toLocaleString(),
@@ -36,7 +42,7 @@ export default function AddCustomer({ onBack }) {
   };
 
   const handleEditSubmit = (index) => {
-    if (editingComment.trim()!== "") {
+    if (editingComment.trim() !== "") {
       const updatedComments = [...commentsList];
       updatedComments[index].text = editingComment;
       setCommentsList(updatedComments);
@@ -51,17 +57,40 @@ export default function AddCustomer({ onBack }) {
     setCommentsList(updatedComments);
   };
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
+  const handleFormSubmit = async (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
+
+    const date = new Date();
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const formatted = date.toLocaleDateString('en-US', options);
+    // Define the enquiry data
     const customerData = {
+      date: formatted, // Use current date-time
       name: customerName,
       country: country,
-      phoneNumber: phoneNumber,
+      phone: phoneNumber,
       email: email,
       message: message,
-      comments: commentsList,
+      page_url:'',
+      comments: commentsList.map(comment => ({
+        comment_text: comment.text,
+        comment_date: comment.timestamp
+      }))
     };
-    console.log(customerData);
+    
+    try {
+      // Make the POST request to create an enquiry
+      const response = await axios.post(`${baseURL}/create-enquiry`, customerData);
+      console.log('Enquiry sent successfully:', response.data);
+      setCustomerName("");
+      setEmail("");
+      setPhoneNumber("");
+      setCountry("");
+      setCommentsList([]);
+      setMessage("");
+    } catch (error) {
+      console.error('Error in sending enquiry:', error);
+    }
   };
 
   return (
@@ -186,7 +215,7 @@ export default function AddCustomer({ onBack }) {
                         {commentsList.map((comment, index) => (
                           <div key={index} className="card mb-3">
                             <div className="card-body d-flex justify-content-between align-items-center">
-                              {editingIndex === index? (
+                              {editingIndex === index ? (
                                 <div className="w-100">
                                   <textarea
                                     rows="2"

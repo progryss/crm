@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import NotificationPopup from "./NotificationPopup"; // Adjust the path if necessary
+import axios from "axios";
 
 function CustomerDetails({ customer, onBack }) {
+
+  const baseURL = process.env.REACT_APP_SERVER_URL;
+
   const [comment, setComment] = useState("");
   const [commentsList, setCommentsList] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -15,11 +19,6 @@ function CustomerDetails({ customer, onBack }) {
 
   const localStorageKey = `comments_${customer.id || customer.name}`;
 
-  useEffect(() => {
-    const savedComments = JSON.parse(localStorage.getItem(localStorageKey)) || [];
-    setCommentsList(savedComments);
-  }, [localStorageKey]);
-
   const handleCommentChange = (e) => {
     setComment(e.target.value);
   };
@@ -28,7 +27,8 @@ function CustomerDetails({ customer, onBack }) {
     setEditingComment(e.target.value);
   };
 
-  const handleCommentSubmit = () => {
+  const handleCommentSubmit = async () => {
+
     if (comment.trim() !== "") {
       const now = new Date();
       const timestamp = now.toLocaleString();
@@ -49,6 +49,15 @@ function CustomerDetails({ customer, onBack }) {
       setNotificationColor("white");
       setNotificationVisible(true);
     }
+
+    
+
+    try {
+      const response = await axios.put(`${baseURL}/update-enquiry/${customer._id}`)
+    } catch (error) {
+      
+    }
+
   };
 
   const handleCommentDelete = (index) => {
@@ -196,9 +205,9 @@ function CustomerDetails({ customer, onBack }) {
               </button>
             </div>
             <div className="comment-box">
-              {commentsList.length > 0 && (
+              {customer.comments.length > 0 && (
                 <>
-                  {commentsList.map((comment, index) => (
+                  {customer.comments.map((comment, index) => (
                     <div key={index} className="card mb-3">
                       <div className="card-body d-flex justify-content-between align-items-center">
                         {editingIndex === index ? (
@@ -225,8 +234,8 @@ function CustomerDetails({ customer, onBack }) {
                         ) : (
                           <>
                             <div>
-                              <div className="comment-text mb-2">{comment.text}</div>
-                              <div className="comment-timestamp">{comment.timestamp}</div>
+                              <div className="comment-text mb-2">{comment.comment_text}</div>
+                              <div className="comment-timestamp">{comment.comment_date}</div>
                             </div>
                             <div>
                               <button
