@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import NotificationPopup from "./NotificationPopup"; // Adjust the path if necessary
 import axios from "axios";
+import { useNotification } from "./NotificationContext"; 
 
 function CustomerDetails({ customer, onBack }) {
 
@@ -11,11 +11,7 @@ function CustomerDetails({ customer, onBack }) {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingComment, setEditingComment] = useState("");
 
-  const [notificationVisible, setNotificationVisible] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
-  const [notificationType, setNotificationType] = useState("");
-  const [notificationBgColor, setNotificationBgColor] = useState("");
-  const [notificationColor, setNotificationColor] = useState("");
+  const { showNotification } = useNotification(); 
 
   const localStorageKey = `comments_${customer.id || customer.name}`;
 
@@ -35,19 +31,13 @@ function CustomerDetails({ customer, onBack }) {
       const newComment = { text: comment, timestamp: timestamp };
       const updatedCommentsList = [newComment, ...commentsList];
       setCommentsList(updatedCommentsList);
-      setComment(""); 
+      setComment("");
       localStorage.setItem(localStorageKey, JSON.stringify(updatedCommentsList));
-      setNotificationMessage("Comment added successfully!");
-      setNotificationType("success");
-      setNotificationBgColor("green");
-      setNotificationColor("white");
-      setNotificationVisible(true);
+      
+      // Show success notification
+      showNotification('Comment added successfully!', 'success', 'green', 'white');
     } else {
-      setNotificationMessage("Comment cannot be empty.");
-      setNotificationType("error");
-      setNotificationBgColor("red");
-      setNotificationColor("white");
-      setNotificationVisible(true);
+      showNotification("Can't be blank!", "error", "red", "white");
     }
 
     
@@ -64,11 +54,6 @@ function CustomerDetails({ customer, onBack }) {
     const updatedCommentsList = commentsList.filter((_, i) => i !== index);
     setCommentsList(updatedCommentsList);
     localStorage.setItem(localStorageKey, JSON.stringify(updatedCommentsList));
-          setNotificationMessage("Delete Comment successfully!");
-          setNotificationType("success");
-          setNotificationBgColor("#000000");
-          setNotificationColor("white");
-          setNotificationVisible(true);
   };
 
   const handleCommentEdit = (index) => {
@@ -85,8 +70,6 @@ function CustomerDetails({ customer, onBack }) {
       setEditingIndex(null);
       setEditingComment("");
       localStorage.setItem(localStorageKey, JSON.stringify(updatedCommentsList));
-          setNotificationMessage("Edit Comment successfully!");
-    setNotificationVisible(true);
     }
   };
 
@@ -262,14 +245,6 @@ function CustomerDetails({ customer, onBack }) {
           </div>
         </div>
       </div>
-      <NotificationPopup
-        message={notificationMessage}
-        type={notificationType}
-        visible={notificationVisible}
-        onClose={() => setNotificationVisible(false)}
-        bgColor={notificationBgColor}
-        color={notificationColor}
-      />
     </div>
   );
 }

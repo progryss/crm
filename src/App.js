@@ -1,9 +1,11 @@
+// App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import Header from './components/Header';
+import Header from './components/Header'; // Assuming Header.js is in ./components/Header.js
 import './App.css';
-import Customer from './components/Customer';
-import LoginPage from './components/LoginPage';
+import Customer from './components/Customer'; // Assuming Customer.js is in ./components/Customer.js
+import LoginPage from './components/LoginPage'; // Assuming LoginPage.js is in ./components/LoginPage.js
+import { NotificationProvider } from './components/NotificationContext'; // Adjusted path
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,12 +14,10 @@ function App() {
         const isAppInitialized = sessionStorage.getItem('isAppInitialized');
 
         if (!isAppInitialized) {
-            // This block will only run on the first server start (or if session storage is cleared)
             localStorage.setItem('isLoggedIn', 'false');
             sessionStorage.setItem('isAppInitialized', 'true');
             setIsLoggedIn(false);
         } else {
-            // Regular refresh behavior
             const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
             setIsLoggedIn(loggedIn);
         }
@@ -34,11 +34,13 @@ function App() {
     };
 
     return (
-        <Router>
-            <div className="App">
-                <AppContent isLoggedIn={isLoggedIn} handleLogin={handleLogin} handleLogout={handleLogout} />
-            </div>
-        </Router>
+        <NotificationProvider> {/* Wrap the Router with NotificationProvider */}
+            <Router>
+                <div className="App">
+                    <AppContent isLoggedIn={isLoggedIn} handleLogin={handleLogin} handleLogout={handleLogout} />
+                </div>
+            </Router>
+        </NotificationProvider>
     );
 }
 

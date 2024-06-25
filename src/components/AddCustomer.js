@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from 'axios';
 
 
+import { useNotification } from "./NotificationContext"; // Adjust the path if necessary
 
 export default function AddCustomer({ onBack }) {
   
@@ -16,6 +17,8 @@ export default function AddCustomer({ onBack }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+
+  const { showNotification } = useNotification();
 
   const handleCommentChange = (event) => {
     setComment(event.target.value);
@@ -77,6 +80,7 @@ export default function AddCustomer({ onBack }) {
         comment_date: comment.timestamp
       }))
     };
+<<<<<<< HEAD
     
     try {
       // Make the POST request to create an enquiry
@@ -91,6 +95,12 @@ export default function AddCustomer({ onBack }) {
     } catch (error) {
       console.error('Error in sending enquiry:', error);
     }
+=======
+
+    // Simulate success notification
+    showNotification('Customer added successfully!', 'success', 'green', 'white');
+    console.log(customerData);
+>>>>>>> cc1df7a79b7b9872d142628ea534122dc9772b1b
   };
 
   return (
